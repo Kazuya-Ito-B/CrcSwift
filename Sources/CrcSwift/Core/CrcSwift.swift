@@ -6,7 +6,63 @@
 //  Copyright © 2020 Ivan Elyoskin. All rights reserved.
 //
 
-class CrcSwift {
+public class CrcSwift {
+    public enum MODE {
+        case crc8
+        case crc16
+        case crc32
+    }
+    
+    public enum CRC8_TYPE {
+        case def
+        case cdma2000
+        case darc
+        case dvbS2
+        case ebu
+        case iCode
+        case itu
+        case maxim
+        case rohc
+        case wcdma
+    }
+    
+    public enum CRC16_TYPE {
+        case ccittFalse
+        case arc
+        case augCcitt
+        case buypass
+        case cdma2000
+        case dds110
+        case dectR
+        case dectX
+        case dnp
+        case en13757
+        case genibus
+        case maxim
+        case mcrf4xx
+        case riello
+        case t10dif
+        case teledisk
+        case tms37157
+        case usb
+        case a
+        case kermit
+        case modbus
+        case x25
+        case xmodem
+    }
+    
+    public enum CRC32_TYPE {
+        case def
+        case bzip2
+        case c
+        case d
+        case mpeg2
+        case posix
+        case q
+        case jamcrc
+        case xfer
+    }
     
     private let CRC_TABLE_SIZE = 256
     
@@ -19,7 +75,7 @@ class CrcSwift {
         binaryString = String(repeating: "0", count: 16 - binaryString.count) + binaryString
         
         let revBinaryString = String(binaryString.reversed())
-
+        
         return UInt16(revBinaryString, radix: 2) ?? 0
     }
     
@@ -28,14 +84,16 @@ class CrcSwift {
         binaryString = String(repeating: "0", count: 8 - binaryString.count) + binaryString
         
         let revBinaryString = String(binaryString.reversed())
-
+        
         return UInt8(revBinaryString, radix: 2) ?? 0
     }
     
-    /**
-     Crc8 caluculator
-     */
-    static func calcCrc8(_ data: [UInt8], mode: CRC8_TYPE = .def) -> UInt8 {
+    /// CRC8 Caluculator
+    ///
+    /// :param: data:[UInt8] - Byte配列
+    /// :param: mode:CrcSwift.CRC8_TYPE - CRC8種別
+    /// :returns: CRC8: UInt8
+    public static func calcCrc8(_ data: [UInt8], mode: CrcSwift.CRC8_TYPE = .def) -> UInt8 {
         var polynomial: UInt8 = 0x00
         var initial: UInt8 = 0x00
         var xor: UInt8 = 0x00
@@ -78,7 +136,16 @@ class CrcSwift {
         )
     }
     
-    static func calcCrc8(
+    /// CRC8 Caluculator , none mode
+    ///
+    /// :param: data:[UInt8] - Byte配列
+    /// :param: initialCrc: UInt8
+    /// :param: polynomial: UInt8
+    /// :param: xor: UInt8
+    /// :param: refIn: Bool
+    /// :param: refOut: Bool
+    /// :returns: CRC8: UInt8
+    public static func calcCrc8(
         _ data: [UInt8],
         initialCrc: UInt8 = 0x00,
         polynomial: UInt8 = 0x07,
@@ -100,7 +167,7 @@ class CrcSwift {
                     crc >>= 1
                     
                     if check != 0 {
-                         crc ^= polynom
+                        crc ^= polynom
                     }
                     
                     byte >>= 1
@@ -114,14 +181,16 @@ class CrcSwift {
                 }
             }
         }
-
+        
         return crc ^ xor;
     }
     
-    /**
-     * Crc16 calculation
-     */
-    static func calcCrc16(_ data: [UInt8], mode: CRC16_TYPE = .ccittFalse) -> UInt16 {
+    /// CRC16 Caluculator
+    ///
+    /// :param: data:[UInt8] - Byte配列
+    /// :param: mode:CrcSwift.CRC16_TYPE - CRC16種別
+    /// :returns: CRC16: UInt16
+    static func calcCrc16(_ data: [UInt8], mode: CrcSwift.CRC16_TYPE = .ccittFalse) -> UInt16 {
         var polynomial: UInt16 = 0x0000
         var crc: UInt16 = 0x0000
         var xor: UInt16 = 0x0000
@@ -143,7 +212,7 @@ class CrcSwift {
         } else if mode == .teledisk {
             polynomial = 0xa097
         }
-
+        
         if mode == .ccittFalse || mode == .cdma2000 || mode == .genibus || mode == .mcrf4xx || mode == .usb || mode == .modbus || mode == .x25 {
             crc = 0xFFFF
         } else if mode == .arc || mode == .buypass || mode == .dectR || mode == .dectX || mode == .dnp || mode == .en13757 || mode == .maxim || mode == .t10dif || mode == .teledisk || mode == .kermit || mode == .xmodem {
@@ -176,45 +245,15 @@ class CrcSwift {
         )
     }
     
-    public static func calcCrc162(
-        _ data: [UInt8] = [],
-        initialCrc: UInt16 = 0xFFFF,
-        polynomial: UInt16 = 0x1021,
-        xor: UInt16 = 0x0000,
-        refIn: Bool = false,
-        refOut: Bool = false
-    ) -> UInt16 {
-        var crc = initialCrc;
-        let polynom = refOut ? reverseBites(polynomial) : polynomial;
-        
-        for byte in data {
-            var tempByte = UInt16(byte)
-            if !refIn {
-                crc ^= tempByte << 8;
-            }
-            for _ in 0 ..< 8 {
-                if refIn {
-                    let check1 = crc & 0x0001
-                    let check2 = tempByte & 0x0001
-                    crc >>= 1
-                    tempByte >>= 1
-                    
-                    if (check1 ^ check2) == 1 {
-                        crc ^= polynom
-                    }
-                } else {
-                    let check = crc & 0x8000
-                    crc <<= 1
-                    
-                    if check != 0 {
-                        crc ^= polynom
-                    }
-                }
-            }
-        }
-        return crc ^ xor
-    }
-    
+    /// CRC16 Caluculator , none mode
+    ///
+    /// :param: data:[UInt8] - Byte配列
+    /// :param: initialCrc: UInt16
+    /// :param: polynomial: UInt16
+    /// :param: xor: UInt16
+    /// :param: refIn: Bool
+    /// :param: refOut: Bool
+    /// :returns: CRC16: UInt16
     public static func calcCrc16(
         _ data: [UInt8] = [],
         initialCrc: UInt16 = 0xFFFF,
@@ -242,7 +281,7 @@ class CrcSwift {
                 }
             }
         }
-
+        
         if refOut {
             crc = CrcSwift.reverseBites(crc);
         }
@@ -250,11 +289,12 @@ class CrcSwift {
         return (crc ^ xor);
     }
     
-    
-    /**
-     Crc32 calculation
-     */
-    public static func calcCrc32(_ data: [UInt8], mode: CRC32_TYPE = .def) -> UInt32 {
+    /// CRC32 Caluculator
+    ///
+    /// :param: data:[UInt8] - Byte配列
+    /// :param: mode:CrcSwift.CRC32_TYPE - CRC32種別
+    /// :returns: CRC32: UInt32
+    public static func calcCrc32(_ data: [UInt8], mode: CrcSwift.CRC32_TYPE = .def) -> UInt32 {
         var polynomial: UInt32 = 0x04C11DB7
         var crc: UInt32 = (mode == .posix || mode == .q || mode == .xfer) ? 0x00000000 : 0xFFFFFFFF
         let xor: UInt32 = (mode == .def || mode == .bzip2 || mode == .c || mode == .d || mode == .posix) ? 0xFFFFFFFF : 0x00000000
@@ -270,7 +310,7 @@ class CrcSwift {
         } else if mode == .xfer {
             polynomial = 0x000000AF
         }
-
+        
         crc = ~crc
         for byte in data {
             crc ^= UInt32(byte)
@@ -284,9 +324,5 @@ class CrcSwift {
         }
         let result = crc ^ xor
         return result
-    }
-    
-    public static func calcCrc32() {
-        
     }
 }

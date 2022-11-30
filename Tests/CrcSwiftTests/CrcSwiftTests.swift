@@ -19,7 +19,7 @@ struct Check<T, Y> {
 class CrcSwiftTests: XCTestCase {
     
     static let data: [UInt8] = [0xA4, 0x01, 0x00, 0x0A, 0xFF, 0x06, 0x11, 0x01, 0x01, 0x13, 0x00, 0xD3] // A401000AFF061101011300D3
-    let checks8: [Check<CRC8_TYPE, UInt8>] = [
+    let checks8: [Check<CrcSwift.CRC8_TYPE, UInt8>] = [
         Check(mode: .def, data: data, result: 0x78),
         Check(mode: .cdma2000, data: data, result: 0xbe),
         Check(mode: .darc, data: data, result: 0x59),
@@ -32,7 +32,7 @@ class CrcSwiftTests: XCTestCase {
         Check(mode: .wcdma, data: data, result: 0x9a),
     ]
     
-    let checks16: [Check<CRC16_TYPE, UInt16>] = [
+    let checks16: [Check<CrcSwift.CRC16_TYPE, UInt16>] = [
         // refIn | refOut = true
         Check(mode: .ccittFalse, data: data, result: 0x2D7B),
         Check(mode: .augCcitt, data: data, result: 0x00e8),
@@ -82,6 +82,18 @@ class CrcSwiftTests: XCTestCase {
             let crc = CrcSwift.calcCrc16(check.data, mode: check.mode)
             XCTAssertEqual(crc, check.result)
         }
+        
+        let zeroData:[UInt8] = [0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00]
+        XCTAssertEqual("e139", String(CrcSwift.calcCrc16(zeroData, mode: .ccittFalse), radix: 16))
+        
+        let ffData:[UInt8] = [0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff]
+        XCTAssertEqual("a6e1", String(CrcSwift.calcCrc16(ffData, mode: .ccittFalse), radix: 16))
+        
+        let caseAData:[UInt8] = [0x01,0x02,0x03,0x04,0x05,0x06,0x07,0x08,0x09,0x0a]
+        XCTAssertEqual("2c72", String(CrcSwift.calcCrc16(caseAData, mode: .ccittFalse), radix: 16))
+        
+        let caseBData:[UInt8] = [0x0a,0x02,0x03,0x04,0x05,0x06,0x07,0x08,0x09,0x01]
+        XCTAssertEqual("669d", String(CrcSwift.calcCrc16(caseBData, mode: .ccittFalse), radix: 16))
     }
     
 //    func testCrc162() {
