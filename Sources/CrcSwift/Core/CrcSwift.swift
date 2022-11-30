@@ -190,7 +190,7 @@ public class CrcSwift {
     /// :param: data:[UInt8] - Byte配列
     /// :param: mode:CrcSwift.CRC16_TYPE - CRC16種別
     /// :returns: CRC16: UInt16
-    static func calcCrc16(_ data: [UInt8], mode: CrcSwift.CRC16_TYPE = .ccittFalse) -> UInt16 {
+    public static func calcCrc16(_ data: [UInt8], mode: CrcSwift.CRC16_TYPE = .ccittFalse) -> UInt16 {
         var polynomial: UInt16 = 0x0000
         var crc: UInt16 = 0x0000
         var xor: UInt16 = 0x0000
